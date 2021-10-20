@@ -19,9 +19,7 @@ pwm = GPIO.PWM(pwmPin, 50) # PWM object at 50 Hz (20 ms period)
 pwm.start(0)
 
 try:
-  i=0
-  while i<2:
-    i=i+1
+  while True:
     for dc in range(dcMin,dcMax):
       pwm.ChangeDutyCycle(dc)
       print(dc)
