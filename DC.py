@@ -10,8 +10,8 @@ try:
   i=0
   while i<2:
     for dc in range(0,100):
-        pwm.ChangeDutyCycle(dc)
-        print(dc)
+        pwm.ChangeDutyCycle(100-dc)
+        print(100-dc)
         time.sleep(0.1)
     i=i+1
 except KeyboardInterrupt:
