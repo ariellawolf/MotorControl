@@ -1,29 +1,37 @@
-# Basic code for servo control using manual PWM
-# Set PWM period = 20 ms
-# 1 ms ON = full CW = 5% duty cycle
-# 2 ms ON = full CCW = 10% duty cycle
-
 import RPi.GPIO as GPIO
 import time
 
 GPIO.setmode(GPIO.BCM)
-pwmPin = 24
-GPIO.setup(pwmPin, GPIO.OUT)
 
-# set min & max % duty cycles (5 and 10 are default values, but play
-# around to find optimum values for your motor)
-dcMin = 3
-dcMax = 12
+pins = [19,13,6,5] # controller inputs: in1, in2, in3, in4
+for pin in pins:
+  GPIO.setup(pin, GPIO.OUT, initial=0)
 
-pwm = GPIO.PWM(pwmPin, 50) # PWM object at 50 Hz (20 ms period)
-pwm.start(0)
+# Define the pin sequence for counter-clockwise motion, noting that
+# two adjacent phases must be actuated together before stepping to
+# a new phase so that the rotor is pulled in the right direction:
+ccw = [ [1,0,0,0],[1,1,0,0],[0,1,0,0],[0,1,1,0],
+        [0,0,1,0],[0,0,1,1],[0,0,0,1],[1,0,0,1] ]
+# Make a copy of the ccw sequence. This is needed since simply
+# saying cw = ccw would point both variables to the same list object:
+cw = ccw[:]  # use slicing to copy list (could also use ccw.copy() in Python 3)
+cw.reverse() # reverse the new cw sequence
 
+def delay_us(tus): # use microseconds to improve time resolution
+  endTime = time.time() + float(tus)/ float(1E6)
+  while time.time() < endTime:
+    pass
+
+# Make a full rotation of the output shaft:
+def loop(dir): # dir = rotation direction (cw or ccw)
+  for i in range(512): # full revolution (8 cycles/rotation * 64 gear ratio)
+    for halfstep in range(8): # 8 half-steps per cycle
+      for pin in range(4):    # 4 pins that need to be energized
+        GPIO.output(pins[pin], dir[halfstep][pin])
+      delay_us(1000)
 try:
-  while True:
-    for dc in range(dcMin,dcMax):
-      pwm.ChangeDutyCycle(dc)
-      print(dc)
-      time.sleep(0.5)
-except KeyboardInterrupt:
-  print("closing")
-GPIO.cleanup()
+  loop(cw)
+  loop(ccw)
+except:
+  pass
+GPIO.cleanup() 
