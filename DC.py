@@ -6,7 +6,10 @@ pwmPin = 24
 GPIO.setup(pwmPin, GPIO.OUT)
 pwm = GPIO.PWM(pwmPin, 50) # PWM object at 50 Hz (20 ms period)
 pwm.start(100)
-for dc in range(0,100):
+try: 
+  for dc in range(0,100):
       pwm.ChangeDutyCycle(100-dc)
       print(100-dc)
       time.sleep(0.5)
+except KeyboardInterrupt:
+  GPIO.cleanup()
