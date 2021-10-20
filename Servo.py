@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
 p= 5
-dc=5
+dc=50
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(p, GPIO.OUT)
 T = 0.02                   # define the servo signal period
